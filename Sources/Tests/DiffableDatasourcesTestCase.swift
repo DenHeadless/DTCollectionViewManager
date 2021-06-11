@@ -73,6 +73,28 @@ class DiffableDatasourcesTestCase: XCTestCase {
         XCTAssertEqual(controller.manager.storage.numberOfItems(inSection: 1), 2)
     }
     
+    func testApplyingDatasourceWithAnimationDoesNotCrashOnXcode13() {
+        guard #available(iOS 13, tvOS 13, *) else { return }
+        dataSource.apply(.snapshot(with: { snapshot in
+            snapshot.appendSections([.one, .two])
+            snapshot.appendItems([1,2], toSection: .one)
+            snapshot.appendItems([3,4], toSection: .two)
+        }), animatingDifferences: true)
+        
+        XCTAssert(controller.verifyItem(2, atIndexPath: indexPath(1, 0)))
+        XCTAssert(controller.verifyItem(3, atIndexPath: indexPath(0, 1)))
+        XCTAssertEqual(controller.manager.storage.numberOfSections(), 2)
+        XCTAssertEqual(controller.manager.storage.numberOfItems(inSection: 0), 2)
+        XCTAssertEqual(controller.manager.storage.numberOfItems(inSection: 1), 2)
+        
+        let exp = expectation(description: "waiting for Xcode 13 exception to come in")
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            exp.fulfill()
+        }
+        waitForExpectations(timeout: 1, handler: nil)
+    }
+    
     func testCellSelectionClosure()
     {
         guard #available(iOS 13, tvOS 13, *) else { return }

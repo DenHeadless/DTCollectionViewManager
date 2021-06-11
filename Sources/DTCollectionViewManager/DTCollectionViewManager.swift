@@ -235,6 +235,7 @@ open class DTCollectionViewManager {
         storage = ProxyDiffableDataSourceStorage(collectionView: collectionView,
                                                                  dataSource: dataSource,
                                                                  modelProvider: modelProvider)
+        collectionDataSource?.applyDiffableDatasourcesWorkaroundForXcode13()
         collectionView.dataSource = collectionDataSource
         
         return dataSource
@@ -259,6 +260,7 @@ open class DTCollectionViewManager {
         storage = ProxyDiffableDataSourceStorage(collectionView: collectionView,
                                                                  dataSource: dataSource,
                                                                  modelProvider: modelProvider)
+        collectionDataSource?.applyDiffableDatasourcesWorkaroundForXcode13()
         collectionView.dataSource = collectionDataSource
         
         return dataSource

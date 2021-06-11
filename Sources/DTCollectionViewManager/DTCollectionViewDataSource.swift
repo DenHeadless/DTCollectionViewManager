@@ -36,6 +36,12 @@ open class DTCollectionViewDataSource: DTCollectionViewDelegateWrapper, UICollec
         collectionView?.dataSource = self
     }
     
+    private var shouldWorkAroundXcode13DiffableDatasourceException: Bool = false
+    
+    internal func applyDiffableDatasourcesWorkaroundForXcode13() {
+        shouldWorkAroundXcode13DiffableDatasourceException = true
+    }
+    
     private func dummyCell(for indexPath: IndexPath) -> UICollectionViewCell {
         let identifier =  String(describing: type(of: DummyCollectionViewCellThatPreventsAppFromCrashing.self))
         collectionView?.register(DummyCollectionViewCellThatPreventsAppFromCrashing.self,
@@ -144,4 +150,19 @@ open class DTCollectionViewDataSource: DTCollectionViewDelegateWrapper, UICollec
                                                                           at: index) ?? IndexPath(item: 0, section: 0)
     }
     #endif
+    
+    /// FB9134901. UICollectionViewDiffableDataSource crashes the app if collection view datasource is not an instance or subclass of UICollectionViewDiffableDataSource (Xcode 13).
+    /// Apple response:
+    ///    This behaves as expected.
+    ///
+    ///   You cannot use UICollectionViewDiffableDataSource externally like this.
+    ///
+    /// Narrator:
+    ///    But he could. And it was glorious.
+    open override func responds(to aSelector: Selector) -> Bool {
+        if shouldWorkAroundXcode13DiffableDatasourceException, aSelector.description == "_isDiffableDataSource" {
+            return true
+        }
+        return super.responds(to: aSelector)
+    }
 }
